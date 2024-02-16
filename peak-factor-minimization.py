@@ -9,9 +9,17 @@ def time_frequency_swap_algorithm(signal, fs, clipping_ratio=0.85):
     N = len(signal)
     T = 1/fs
     f = signal.copy()
+
+    E_eff = np.sqrt(np.mean(f**2))
+    # Calculate the new Kr
+    M_plus = np.max(f)
+    M_minus = np.min(f)
+    Kr = (M_plus - M_minus) / (2 * E_eff)
+    
     
     # Initialize variables
-    Kr_previous = float('inf')  # Initialize to infinity for the first iteration
+    Kr_previous = Kr  # Initialize to infinity for the first iteration
+    print(Kr_previous)
     iteration = 0
 
     # Start the algorithm loop
@@ -42,6 +50,7 @@ def time_frequency_swap_algorithm(signal, fs, clipping_ratio=0.85):
         M_plus = np.max(f_clipped)
         M_minus = np.min(f_clipped)
         Kr = (M_plus - M_minus) / (2 * E_eff)
+        print(Kr)
         
         # Increment iteration count
         iteration += 1
@@ -54,9 +63,14 @@ def time_frequency_swap_algorithm(signal, fs, clipping_ratio=0.85):
     return f_clipped, Kr, iteration
 
 # load wav file
-#file_path = 'e-v.wav'
-file_path = 'xsignal.wav'
+#file_path = 'data/e-v.wav'
+file_path = 'data/xsignal.wav'
 fs, data = wav.read(file_path)
+
+if data.dtype == np.int16:
+    data = data.astype(np.float32) / np.iinfo(np.int16).max
+elif data.dtype == np.int32:
+    data = data.astype(np.float32) / np.iinfo(np.int32).max
 
 # convert to mono if stereo
 if len(data.shape) == 2:
@@ -66,7 +80,13 @@ f_compressed, final_Kr, total_iterations = time_frequency_swap_algorithm(data, f
 
 print(f"Final Kr: {final_Kr}, Total Iterations: {total_iterations}")
 
+f_compressed = np.clip(f_compressed, -1.0, 1.0)
+
+# float 신호를 int16으로 변환
+f_compressed = (f_compressed * np.iinfo(np.int16).max).astype(np.int16)
+
+
 # save wav file
-#output_file_path = 'processed_e-v.wav'
-output_file_path = 'processed_xsignal.wav'
-wav.write(output_file_path, fs, f_compressed.astype(np.int16))
+#output_file_path = 'data/processed_e-v.wav'
+output_file_path = 'data/processed_xsignal.wav'
+wav.write(output_file_path, fs, f_compressed)
