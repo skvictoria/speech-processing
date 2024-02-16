@@ -1,6 +1,5 @@
 '''
-Implement the paper "Peak factor minimization using a time-frequency domain swapping algorithm"
-written by Edwin van der ouderaa et al.
+Implemented the paper "Peak factor minimization using a time-frequency domain swapping algorithm"
 '''
 import numpy as np
 
