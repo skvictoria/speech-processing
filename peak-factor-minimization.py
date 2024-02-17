@@ -5,39 +5,25 @@ import scipy.io.wavfile as wav
 import numpy as np
 
 def time_frequency_swap_algorithm(signal, fs, clipping_ratio=0.85):
-    # Generate the initial multisine signal
-    N = len(signal)
-    T = 1/fs
     f = signal.copy()
-
+    
     E_eff = np.sqrt(np.mean(f**2))
-    # Calculate the new Kr
     M_plus = np.max(f)
     M_minus = np.min(f)
-    Kr = (M_plus - M_minus) / (2 * E_eff)
+    Kr_previous = (M_plus - M_minus) / (2 * E_eff)
     
-    
-    # Initialize variables
-    Kr_previous = Kr  # Initialize to infinity for the first iteration
-    print(Kr_previous)
     iteration = 0
-
-    # Start the algorithm loop
     while True:
-        # Perform the FFT
         F = np.fft.fft(f)
-        
         # Retain the phases and impose the original magnitudes
         # to get a symmetric magnitude spectrum and anti-symmetric phase spectrum
         F_magnitude = np.abs(F)
         F_phase = np.angle(F)
-        
         # Rebuild the Fourier spectrum with the original magnitudes and retained phases
         F = F_magnitude * np.exp(1j * F_phase)
         
         # Perform the inverse FFT
         f = np.fft.ifft(F).real
-        
         # Clip the time signal
         max_val = np.max(np.abs(f))
         clip_val = max_val * clipping_ratio
@@ -50,7 +36,6 @@ def time_frequency_swap_algorithm(signal, fs, clipping_ratio=0.85):
         M_plus = np.max(f_clipped)
         M_minus = np.min(f_clipped)
         Kr = (M_plus - M_minus) / (2 * E_eff)
-        print(Kr)
         
         # Increment iteration count
         iteration += 1
@@ -82,9 +67,8 @@ print(f"Final Kr: {final_Kr}, Total Iterations: {total_iterations}")
 
 f_compressed = np.clip(f_compressed, -1.0, 1.0)
 
-# float 신호를 int16으로 변환
+# float to int16
 f_compressed = (f_compressed * np.iinfo(np.int16).max).astype(np.int16)
-
 
 # save wav file
 #output_file_path = 'data/processed_e-v.wav'

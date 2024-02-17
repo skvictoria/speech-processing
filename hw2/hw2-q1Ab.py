@@ -30,4 +30,4 @@ plt.show()
 # Results for Problem A (b)
 # We return the first few DFT coefficients and their corresponding frequencies for comparison
 dft_results = [(freq, coeff) for freq, coeff in zip(freqs[:N // 2], X_k[:N // 2])]
-dft_results[:10]  # Display first 10 DFT coefficients for brevity
+print(dft_results[100], dft_results[150])
